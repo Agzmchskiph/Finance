@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Семейный бюджет</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root {
+      --bg: #18191a;
+      --card: #23262b;
+      --radius: 8px;
+      --transition: .18s;
+      --green: #8bf076;
+      --yellow: #f0c87d;
+      --danger: #e15858;
+      --muted: #aaa;
+      --button-bg: #4965fa;
+      --text: #f2f2f2;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 0 16px;
+    }
+
+    header h1 {
+      text-align: center;
+      font-size: 2.2rem;
+      margin: 28px 0 12px;
+      font-weight: 700;
+      flex-grow: 1;
+    }
+
+    .period-selector {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .period-selector label {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .period-selector input {
+      padding: 8px 12px;
+      border: 1px solid #444;
+      border-radius: var(--radius);
+      background: #1f2229;
+      color: #e6e6e6;
+      font-size: 1rem;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 16px 60px;
+    }
+
+    .row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+      align-items: flex-start;
+    }
+
+    .income-section,
+    .fixed-section {
+      flex: 1 1 65%;
+      min-width: 320px;
+    }
+
+    .balance-section {
+      flex: 0 0 220px;
+      display: flex;
+      justify-content: flex-end;
+      min-width: 180px;
+    }
+
+    .balance-card {
+      background: var(--card);
+      border-radius: 13px;
+      padding: 18px 14px 14px;
+      text-align: center;
+      width: 100%;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .15);
+    }
+
+    .balance-title {
+      font-size: .95rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .balance-amount {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--green);
+    }
+
+    .balance-amount.negative {
+      color: var(--danger);
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    .add-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .add-row input {
+      flex: 1 1 auto;
+      padding: 10px 14px;
+      border: 1px solid #444;
+      border-radius: var(--radius);
+      background: #1f2229;
+      color: #e6e6e6;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .add-row button {
+      padding: 10px 22px;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--button-bg);
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    .add-row button:hover {
+      background: #3550db;
+    }
+
+    .income-list,
+    .fixed-list,
+    .distribution-categories,
+    .savings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .income-item,
+    .fixed-item,
+    .distribution-item,
+    .savings-item {
+      background: #23262b;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    .income-category,
+    .fixed-category,
+    .distribution-name,
+    .savings-name {
+      flex: 0 0 120px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #e4e4e4;
+      min-width: 120px;
+    }
+
+    .group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 200px;
+    }
+
+    .group input {
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #1f2229;
+      color: #e6e6e6;
+      font-size: 1rem;
+      outline: none;
+      width: 100%;
+    }
+
+    .mini-itogo {
+      font-size: .95rem;
+      font-weight: 600;
+      color: var(--green);
+      white-space: nowrap;
+    }
+
+    .actions-vertical {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .actions-vertical button {
+      background: #31374e;
+      border: none;
+      color: #fff;
+      font-size: .95rem;
+      border-radius: 6px;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+      min-width: 100px;
+      font-weight: 500;
+    }
+
+    .actions-vertical button:hover {
+      background: #44d36d;
+    }
+
+    .actions-vertical .cancel:hover {
+      background: #bf3636;
+    }
+
+    .remove-btn {
+      background: #434353;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      color: #fff;
+      font-size: .95rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background var(--transition);
+      white-space: nowrap;
+    }
+
+    .remove-btn:hover {
+      background: #ea4e4e;
+    }
+
+    .totals-row {
+      display: flex;
+      gap: 40px;
+      justify-content: flex-end;
+      align-items: baseline;
+      font-size: 1.1rem;
+      font-weight: 600;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .totals-highlight {
+      color: var(--green);
+      font-size: 1.25rem;
+      letter-spacing: 1px;
+    }
+
+    .totals-fact {
+      color: var(--yellow);
+    }
+
+    .result-negative {
+      color: var(--danger);
+    }
+
+    /* Распределение */
+    .distribution-section {
+      margin-top: 48px;
+    }
+
+    .distribution-remaining-card {
+      background: #23272f;
+      border-radius: 10px;
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .distribution-label {
+      font-size: .95rem;
+      color: var(--muted);
+    }
+
+    .distribution-amount {
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: .5px;
+    }
+
+    .distribution-amount.negative {
+      color: var(--danger);
+    }
+
+    .distribution-inputs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .distribution-inputs input[type="text"] {
+      flex: 1 1 300px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #1f2229;
+      color: #e6e6e6;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .distribution-inputs button {
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: none;
+      background: var(--button-bg);
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    .distribution-inputs button:hover {
+      background: #3550db;
+    }
+
+    .percent-block {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 200px;
+    }
+
+    .percent-control {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #1f222b;
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+
+    .arrow-btn {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 2px 6px;
+      font-size: 1rem;
+      user-select: none;
+    }
+
+    .arrow-btn:hover {
+      color: #fff;
+    }
+
+    .percent-input {
+      width: 70px;
+      padding: 4px 8px;
+      border-radius: 5px;
+      border: 1px solid #444;
+      background: #1e2027;
+      color: var(--text);
+      font-size: .95rem;
+      text-align: right;
+      outline: none;
+    }
+
+    .percent-symbol {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--green);
+    }
+
+    .distribution-amount-per-cat {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--green);
+      min-width: 140px;
+    }
+
+    .distribution-remove {
+      margin-left: auto;
+      padding: 8px 16px;
+      background: #434353;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      font-size: .9rem;
+      font-weight: 500;
+      transition: background var(--transition);
+      white-space: nowrap;
+    }
+
+    .distribution-remove:hover {
+      background: #ea4e4e;
+    }
+
+    .distribution-totals {
+      display: flex;
+      gap: 36px;
+      justify-content: flex-end;
+      align-items: baseline;
+      font-size: 1.05rem;
+      font-weight: 600;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .distribution-totals .label {
+      display: flex;
+      gap: 6px;
+      align-items: baseline;
+    }
+
+    .unallocated {
+      color: var(--yellow);
+    }
+
+    .warning {
+      color: var(--danger);
+    }
+
+    /* 4. Накопления - ОБНОВЛЕННЫЕ СТИЛИ */
+    .savings-section {
+      margin-top: 48px;
+    }
+
+    .savings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .savings-item {
+      background: #23262b;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .savings-name {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #e4e4e4;
+      min-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .savings-amount {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--green);
+      white-space: nowrap;
+      text-align: right;
+      padding-right: 12px;
+    }
+
+    .savings-added {
+      color: var(--yellow);
+      font-size: 0.9em;
+      margin-left: 4px;
+    }
+
+    .savings-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .spend-input {
+      width: 100px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #1f2229;
+      color: #e6e6e6;
+    }
+
+    .spend-btn {
+      padding: 8px 16px;
+      background: #434353;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.18s;
+      white-space: nowrap;
+    }
+
+    .spend-btn:hover {
+      background: #4965fa;
+    }
+
+    /* Сохранение */
+    .save-section {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .save-btn {
+      padding: 12px 28px;
+      background: var(--button-bg);
+      border: none;
+      border-radius: var(--radius);
+      color: #fff;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    .save-btn:hover {
+      background: #3550db;
+    }
+
+    .last-saved {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 900px) {
+
+      .income-item,
+      .fixed-item,
+      .distribution-item,
+      .savings-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .savings-item {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .savings-controls {
+        justify-content: flex-start;
+        width: 100%;
+      }
+
+      .savings-amount {
+        text-align: left;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .period-selector {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Семейный бюджет</h1>
+    <div class="period-selector">
+      <label for="period-start">Период с:</label>
+      <input type="date" id="period-start">
+      <label for="period-end">по:</label>
+      <input type="date" id="period-end">
+    </div>
+  </header>
+  <main>
+    <div class="row">
+      <!-- 1. Доходы -->
+      <section class="income-section">
+        <h2>1. Доходы</h2>
+        <div class="add-row">
+          <input type="text" id="income-category-input" placeholder="Например: зарплата">
+          <button id="add-income-category">Добавить категорию</button>
+        </div>
+        <div class="income-list" id="income-list"></div>
+        <div class="totals-row">
+          <span>Итого доходы: <span class="totals-highlight" id="income-total">0 ₽</span></span>
+        </div>
+      </section>
+      <!-- Баланс -->
+      <section class="balance-section">
+        <div class="balance-card">
+          <div class="balance-title">Баланс на карте</div>
+          <div class="balance-amount" id="balance-on-card">0 ₽</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 2. Обязательные платежи -->
+    <section class="fixed-section">
+      <h2>2. Обязательные платежи</h2>
+      <div class="add-row">
+        <input type="text" id="fixed-category-input" placeholder="Категория платежа">
+        <button id="add-fixed-category">Добавить категорию</button>
+      </div>
+      <div class="fixed-list" id="fixed-list"></div>
+      <div class="totals-row">
+        <span>Всего запланировано: <span class="totals-highlight" id="fixed-total-plan">0 ₽</span></span>
+        <span>Всего потрачено: <span class="totals-fact" id="fixed-total-fact">0 ₽</span></span>
+        <span>Результат: <span class="totals-highlight" id="fixed-total-result">0 ₽</span></span>
+      </div>
+    </section>
+
+    <!-- 3. Распределение оставшихся средств -->
+    <section class="distribution-section">
+      <h2>3. Распределение оставшихся средств</h2>
+      <div class="distribution-remaining-card">
+        <div class="distribution-label">Оставшиеся средства:</div>
+        <div class="distribution-amount" id="distribution-remaining">0 ₽</div>
+      </div>
+      <div class="distribution-inputs">
+        <input type="text" id="distribution-category-input" placeholder="Категория (например: отпуск)">
+        <button id="add-distribution-category">Добавить</button>
+      </div>
+      <div class="distribution-categories" id="distribution-categories"></div>
+      <div class="distribution-totals">
+        <div class="label">Всего процентов: <span id="dist-total-percent">0%</span></div>
+        <div class="label">Нераспределено: <span class="unallocated" id="dist-unallocated-percent">100%</span> (<span
+            class="unallocated" id="dist-unallocated-amount">0 ₽</span>)</div>
+        <div class="label warning" id="dist-over-warning" style="display:none;">Превышено на <span
+            id="dist-over-amount">0%</span></div>
+      </div>
+    </section>
+
+    <!-- 4. Накопления (обновленная верстка) -->
+    <section class="savings-section">
+      <h2>4. Накопления</h2>
+      <div class="add-row">
+        <input type="text" id="savings-category-input" placeholder="Категория (например: резина)">
+        <input type="number" id="savings-amount-input" placeholder="Сумма прошлых накоплений">
+        <button id="add-savings-btn">Добавить</button>
+      </div>
+      <div class="savings-list" id="savings-list"></div>
+      <div class="totals-row">
+        <span>Итого накопления: <span class="totals-highlight" id="savings-total">0 ₽</span></span>
+      </div>
+    </section>
+
+    <!-- Сохранение -->
+    <section class="save-section">
+      <button class="save-btn" id="save-data">Сохранить данные</button>
+      <div class="last-saved" id="last-saved">Данные не сохранены</div>
+    </section>
+  </main>
+  <script>
+    // форматируем
+    function fmt(v) { return v.toLocaleString('ru-RU') + ' ₽'; }
+    function roundOne(v) { return Math.round(v * 10) / 10; }
+    function formatDate(date) {
+      return date.toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // данные
+    let incomes = [];
+    let fixed = [];
+    let distCats = [];
+    let savings = [];
+    let periodStart = new Date();
+    let periodEnd = new Date();
+    let lastSaved = null;
+
+    // Инициализация периода (с 1-го числа текущего месяца до 1-го числа следующего)
+    function initPeriod() {
+      const now = new Date();
+      periodStart = new Date(now.getFullYear(), now.getMonth(), 20);
+      periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 20);
+
+      // Если текущая дата после 20-го, сдвигаем на следующий месяц
+      if (now.getDate() > 20) {
+        periodStart = new Date(now.getFullYear(), now.getMonth() + 1, 20);
+        periodEnd = new Date(now.getFullYear(), now.getMonth() + 2, 20);
+      }
+
+      document.getElementById('period-start').valueAsDate = periodStart;
+      document.getElementById('period-end').valueAsDate = periodEnd;
+    }
+
+    // Загрузка данных из localStorage
+    function loadData() {
+      const savedData = localStorage.getItem('familyBudgetData');
+      if (savedData) {
+        try {
+          const data = JSON.parse(savedData);
+          incomes = data.incomes || [];
+          fixed = data.fixed || [];
+          distCats = data.distCats || [];
+          savings = data.savings || [];
+
+          if (data.periodStart) periodStart = new Date(data.periodStart);
+          if (data.periodEnd) periodEnd = new Date(data.periodEnd);
+          if (data.lastSaved) lastSaved = new Date(data.lastSaved);
+
+          document.getElementById('period-start').valueAsDate = periodStart;
+          document.getElementById('period-end').valueAsDate = periodEnd;
+
+          if (lastSaved) {
+            document.getElementById('last-saved').textContent = `Последнее сохранение: ${formatDate(lastSaved)}`;
+          }
+        } catch (e) {
+          console.error('Ошибка загрузки данных:', e);
+        }
+      }
+    }
+
+    // Сохранение данных в localStorage
+    function saveData() {
+      const data = {
+        incomes,
+        fixed,
+        distCats,
+        savings,
+        periodStart: periodStart.toISOString(),
+        periodEnd: periodEnd.toISOString(),
+        lastSaved: new Date().toISOString()
+      };
+
+      localStorage.setItem('familyBudgetData', JSON.stringify(data));
+      lastSaved = new Date();
+      document.getElementById('last-saved').textContent = `Последнее сохранение: ${formatDate(lastSaved)}`;
+      alert('Данные успешно сохранены!');
+    }
+
+    // Обработчики изменения периода
+    document.getElementById('period-start').addEventListener('change', function () {
+      periodStart = new Date(this.value);
+      saveData();
+    });
+
+    document.getElementById('period-end').addEventListener('change', function () {
+      periodEnd = new Date(this.value);
+      saveData();
+    });
+
+    // Кнопка сохранения
+    document.getElementById('save-data').addEventListener('click', saveData);
+
+    // пересчет остатка (доходы - max(план,факт))
+    function getRemainingForDistribution() {
+      const inc = incomes.reduce((s, x) => s + x.sum, 0);
+      const tP = fixed.reduce((s, x) => s + x.planSum, 0);
+      const tF = fixed.reduce((s, x) => s + x.factSum, 0);
+      return inc - Math.max(tP, tF);
+    }
+
+    // Баланс на карте (доходы - факт.платежи - распределенные суммы)
+    function calculateBalance() {
+      const totalIncome = incomes.reduce((s, x) => s + x.sum, 0);
+      const totalFixedFact = fixed.reduce((s, x) => s + x.factSum, 0);
+      const remaining = getRemainingForDistribution();
+      const totalDistributed = distCats.reduce((s, x) => {
+        return s + Math.round(remaining * x.pct / 100);
+      }, 0);
+      return totalIncome - totalFixedFact - totalDistributed;
+    }
+
+    function renderBalance() {
+      const bal = calculateBalance();
+      const el = document.getElementById('balance-on-card');
+      el.textContent = fmt(bal);
+      el.classList.toggle('negative', bal < 0);
+      recalcDist();
+      renderDistList();
+      renderSavings();
+    }
+
+    // 1. Доходы
+    function renderIncomes() {
+      const list = document.getElementById('income-list'); list.innerHTML = '';
+      incomes.forEach((c, i) => {
+        const it = document.createElement('div'); it.className = 'income-item';
+        const nm = document.createElement('span'); nm.className = 'income-category'; nm.textContent = c.name;
+        it.append(nm);
+        const grp = document.createElement('div'); grp.className = 'group';
+        const inp = document.createElement('input'); inp.type = 'number'; inp.placeholder = 'введите сумму';
+        grp.append(inp);
+        const itog = document.createElement('div'); itog.className = 'mini-itogo';
+        itog.textContent = `Итого: ${fmt(c.sum)}`; grp.append(itog);
+        it.append(grp);
+        const acts = document.createElement('div'); acts.className = 'actions-vertical';
+        const bA = document.createElement('button'); bA.textContent = 'Добавить';
+        const bC = document.createElement('button'); bC.textContent = 'Отменить'; bC.className = 'cancel';
+        acts.append(bA, bC); it.append(acts);
+        const bR = document.createElement('button'); bR.className = 'remove-btn'; bR.textContent = 'Удалить категорию';
+        bR.onclick = () => {
+          incomes.splice(i, 1); renderIncomes(); renderBalance();
+        }; it.append(bR);
+        bA.onclick = () => {
+          const v = +inp.value; if (v > 0) {
+            c.sum += v; c.hist.push(v); inp.value = '';
+            renderIncomes();
+            renderFixed();
+            renderBalance();
+          }
+        };
+        bC.onclick = () => {
+          const last = c.hist.pop(); if (last) { c.sum -= last; if (c.sum < 0) c.sum = 0; }
+          renderIncomes();
+          renderFixed();
+          renderBalance();
+        };
+        list.append(it);
+      });
+      document.getElementById('income-total').textContent = fmt(incomes.reduce((s, x) => s + x.sum, 0));
+      renderBalance();
+    }
+    document.getElementById('add-income-category').onclick = () => {
+      const v = document.getElementById('income-category-input').value.trim();
+      if (v && !incomes.find(x => x.name === v)) {
+        incomes.push({ name: v, sum: 0, hist: [] });
+        document.getElementById('income-category-input').value = '';
+        renderIncomes();
+      }
+    };
+
+    // 2. Обязательные платежи
+    function renderFixed() {
+      const list = document.getElementById('fixed-list'); list.innerHTML = '';
+      fixed.forEach((c, i) => {
+        const it = document.createElement('div'); it.className = 'fixed-item';
+        const nm = document.createElement('span'); nm.className = 'fixed-category'; nm.textContent = c.name;
+        it.append(nm);
+        // план
+        const gp = document.createElement('div'); gp.className = 'group';
+        const ip = document.createElement('input'); ip.type = 'number'; ip.placeholder = 'введите сумму';
+        gp.append(ip);
+        const itp = document.createElement('div'); itp.className = 'mini-itogo';
+        itp.textContent = `Итого: ${fmt(c.planSum)}`; gp.append(itp);
+        it.append(gp);
+        const ap = document.createElement('div'); ap.className = 'actions-vertical';
+        const bp = document.createElement('button'); bp.textContent = 'Добавить';
+        const cp = document.createElement('button'); cp.textContent = 'Отменить'; cp.className = 'cancel';
+        ap.append(bp, cp); it.append(ap);
+        // факт
+        const gf = gp.cloneNode(true); gf.lastChild.textContent = `Итого: ${fmt(c.factSum)}`; it.append(gf);
+        const af = ap.cloneNode(true);
+        af.querySelector('button').textContent = 'Добавить';
+        af.querySelectorAll('button')[1].textContent = 'Отменить';
+        it.append(af);
+        // удалить
+        const br = document.createElement('button'); br.className = 'remove-btn'; br.textContent = 'Удалить категорию';
+        br.onclick = () => { fixed.splice(i, 1); renderFixed(); renderBalance(); };
+        it.append(br);
+        // события
+        bp.onclick = () => {
+          const v = +ip.value; if (v > 0) { c.planHistory.push(v); c.planSum += v; ip.value = ''; renderFixed(); }
+        };
+        cp.onclick = () => {
+          const last = c.planHistory.pop(); if (last) { c.planSum -= last; if (c.planSum < 0) c.planSum = 0; } renderFixed();
+        };
+        const ip2 = gf.querySelector('input');
+        const bf = af.querySelector('button');
+        const cf = af.querySelectorAll('button')[1];
+        bf.onclick = () => {
+          const v = +ip2.value; if (v > 0) {
+            c.factHistory.push(v); c.factSum += v; ip2.value = '';
+            renderFixed();
+            renderDistList();
+            renderBalance();
+            renderSavings();
+          }
+        };
+        cf.onclick = () => {
+          const last = c.factHistory.pop(); if (last) {
+            c.factSum -= last; if (c.factSum < 0) c.factSum = 0;
+            renderFixed();
+            renderDistList();
+            renderBalance();
+            renderSavings();
+          }
+        };
+        list.append(it);
+      });
+      const pSum = fixed.reduce((s, x) => s + x.planSum, 0);
+      const fSum = fixed.reduce((s, x) => s + x.factSum, 0);
+      const res = pSum - fSum;
+      document.getElementById('fixed-total-plan').textContent = fmt(pSum);
+      document.getElementById('fixed-total-fact').textContent = fmt(fSum);
+      const el = document.getElementById('fixed-total-result');
+      el.textContent = fmt(res);
+      el.classList.toggle('result-negative', res < 0);
+    }
+        document.getElementById('add-fixed-category').onclick=()=>{
+      const v=document.getElementById('fixed-category-input').value.trim();
+      if(v && !fixed.find(x=>x.name===v)){
+        fixed.push({name:v,planSum:0,planHistory:[],factSum:0,factHistory:[]});
+        document.getElementById('fixed-category-input').value='';
+        renderFixed();
+      }
+    };
+
+    // 3. Распределение
+    function renderDistList(){
+      const cont=document.getElementById('distribution-categories');
+      cont.innerHTML='';
+      const rem=getRemainingForDistribution();
+      distCats.forEach((c,i)=>{
+        const row=document.createElement('div'); row.className='distribution-item';
+        const nm=document.createElement('div'); nm.className='distribution-name'; nm.textContent=c.name;
+        row.append(nm);
+        const pb=document.createElement('div'); pb.className='percent-block';
+        const dn=document.createElement('button'); dn.className='arrow-btn'; dn.textContent='▼';
+        dn.onclick=()=>adjustPct(i,-1);
+        const inp=document.createElement('input'); inp.className='percent-input'; inp.value=roundOne(c.pct);
+        inp.addEventListener('change',()=>{
+          setPct(i,inp.value);
+          renderDistList();
+        });
+        const up=document.createElement('button'); up.className='arrow-btn'; up.textContent='▲';
+        up.onclick=()=>adjustPct(i,1);
+        pb.append(dn,inp,up,document.createTextNode('%'));
+        row.append(pb);
+        const amt=document.createElement('div'); amt.className='distribution-amount-per-cat';
+        amt.textContent=fmt(Math.round(rem*c.pct/100));
+        row.append(amt);
+        const bR=document.createElement('button'); bR.className='distribution-remove'; bR.textContent='Удалить категорию';
+        bR.onclick=()=>{ distCats.splice(i,1); renderDistList(); renderBalance(); };
+        row.append(bR);
+        cont.append(row);
+      });
+      recalcDist();
+    }
+    function recalcDist(){
+      const rem=getRemainingForDistribution();
+      document.getElementById('distribution-remaining').textContent = fmt(rem);
+      const totalPct = distCats.reduce((s,x)=>s+x.pct,0);
+      const unalloc = Math.max(0,100-totalPct);
+      const over = Math.max(0,totalPct-100);
+      document.getElementById('dist-total-percent').textContent = roundOne(totalPct)+'%';
+      document.getElementById('dist-unallocated-percent').textContent = roundOne(unalloc)+'%';
+      document.getElementById('dist-unallocated-amount').textContent=fmt(Math.round(rem*unalloc/100));
+      const w=document.getElementById('dist-over-warning');
+      if(over>0){ w.style.display='flex'; document.getElementById('dist-over-amount').textContent=roundOne(over)+'%'; }
+      else w.style.display='none';
+      
+      renderSavings();
+    }
+    function adjustPct(i,d){
+      distCats[i].pct = Math.max(0, distCats[i].pct + d);
+      renderDistList();
+      renderBalance();
+      renderSavings();
+    }
+    function setPct(i,val){
+      let n=parseFloat(val.replace(',','.'))||0; n=Math.max(0,Math.min(100,n));
+      distCats[i].pct=n;
+      recalcDist();
+      renderBalance();
+      renderSavings();
+    }
+    document.getElementById('add-distribution-category').onclick=()=>{
+      const v=document.getElementById('distribution-category-input').value.trim();
+      if(v && !distCats.find(x=>x.name===v)){
+        distCats.push({name:v,pct:0});
+        document.getElementById('distribution-category-input').value='';
+        renderDistList();
+        renderBalance();
+      }
+    };
+
+    // 4. Накопления (ОБНОВЛЕННАЯ ВЕРСИЯ)
+    function renderSavings(){
+      const list = document.getElementById('savings-list');
+      list.innerHTML = '';
+      let total = 0;
+      
+      savings.forEach((s, i) => {
+        const distItem = distCats.find(d => d.name === s.name);
+        const addedThisMonth = distItem ? Math.round(getRemainingForDistribution() * distItem.pct / 100) : 0;
+        const totalForCategory = s.total + addedThisMonth;
+        
+        total += totalForCategory;
+        
+        const row = document.createElement('div');
+        row.className = 'savings-item';
+        
+        // Название категории
+        const nameBlock = document.createElement('div');
+        nameBlock.className = 'savings-name';
+        nameBlock.textContent = s.name;
+        row.append(nameBlock);
+        
+        // Сумма
+        const amountBlock = document.createElement('div');
+        amountBlock.className = 'savings-amount';
+        amountBlock.textContent = fmt(totalForCategory);
+        if (addedThisMonth > 0) {
+          const added = document.createElement('span');
+          added.className = 'savings-added';
+          added.textContent = ` (+${fmt(addedThisMonth)})`;
+          amountBlock.append(added);
+        }
+        row.append(amountBlock);
+        
+        // Управление
+        const controls = document.createElement('div');
+        controls.className = 'savings-controls';
+        
+        // Поле для ввода суммы
+        const spendInput = document.createElement('input');
+        spendInput.type = 'number';
+        spendInput.className = 'spend-input';
+        spendInput.placeholder = 'Сумма';
+        spendInput.min = '0';
+        spendInput.step = '100';
+        
+        // Кнопка "Потратить"
+        const spendBtn = document.createElement('button');
+        spendBtn.className = 'spend-btn';
+        spendBtn.textContent = 'Потратить';
+        spendBtn.onclick = () => {
+          const amount = parseFloat(spendInput.value);
+          if (amount > 0 && amount <= totalForCategory) {
+            s.total -= amount;
+            renderSavings();
+            renderBalance();
+          } else {
+            alert('Введите корректную сумму (от 1 до ' + fmt(totalForCategory) + ')');
+          }
+        };
+        
+        // Кнопка удаления
+        const delBtn = document.createElement('button');
+        delBtn.className = 'remove-btn';
+        delBtn.textContent = 'Удалить категорию';
+        delBtn.onclick = () => {
+          if (confirm(`Удалить категорию "${s.name}"?`)) {
+            savings.splice(i, 1);
+            renderSavings();
+            renderBalance();
+          }
+        };
+        
+        controls.append(spendInput, spendBtn, delBtn);
+        row.append(controls);
+        
+        list.append(row);
+      });
+      
+      document.getElementById('savings-total').textContent = fmt(total);
+    }
+    document.getElementById('add-savings-btn').onclick = () => {
+      const name = document.getElementById('savings-category-input').value.trim();
+      const amount = Number(document.getElementById('savings-amount-input').value) || 0;
+      
+      if (name && amount >= 0) {
+        const existing = savings.find(x => x.name === name);
+        if (existing) {
+          existing.total += amount;
+        } else {
+          savings.push({
+            name: name,
+            total: amount
+          });
+        }
+        
+        document.getElementById('savings-category-input').value = '';
+        document.getElementById('savings-amount-input').value = '';
+        renderSavings();
+      }
+    };
+
+    // Инициализация
+    initPeriod();
+    loadData();
+    renderIncomes();
+    renderFixed();
+    renderDistList();
+    renderSavings();
+  </script>
+</body>
+</html>
